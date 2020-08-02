@@ -2,7 +2,7 @@ mod api;
 mod credentials;
 
 use api::query::TimeEntriesQuery;
-use api::{attach_credentials, route, TimeEntries, User};
+use api::TimeEntries;
 use credentials::HarvestCredentials;
 
 #[derive(Debug)]
@@ -21,26 +21,17 @@ impl HarvestClient {
   }
 
   pub async fn prepare(&mut self) -> Result<(), reqwest::Error> {
-    let url = route("/users/me");
-    let builder = reqwest::Client::new().get(&url);
-    let builder = attach_credentials(builder, &self.credentials);
-    let user: User = builder.send().await?.json().await?;
-
+    let user = api::current_user(&self.credentials).await?;
     self.user_id = Some(user.id);
 
     Ok(())
   }
 
   pub async fn time_entries(&self) -> Result<TimeEntries, reqwest::Error> {
-    let url = route("/time_entries");
-    let builder = reqwest::Client::new()
-      .get(&url)
-      // .query(&[("user_id", self.user_id.unwrap())]);
-      .query(&TimeEntriesQuery {
-        user_id: self.user_id.unwrap(),
-      });
-    let builder = attach_credentials(builder, &self.credentials);
-    println!("{:?}", builder);
-    builder.send().await?.json().await
+    let query = TimeEntriesQuery {
+      user_id: self.user_id.expect("HarvestClient was not prepared"),
+    };
+
+    api::time_entries(&query, &self.credentials).await
   }
 }

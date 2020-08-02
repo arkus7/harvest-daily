@@ -6,7 +6,7 @@ const USER_AGENT: &str = "harvest-daily";
 const ACCOUNT_ID_HEADER: &str = "Harvest-Account-ID";
 const BASE_URL: &str = "https://api.harvestapp.com/api/v2";
 
-pub fn attach_credentials(
+fn attach_credentials(
   builder: reqwest::RequestBuilder,
   credentials: &HarvestCredentials,
 ) -> reqwest::RequestBuilder {
@@ -20,8 +20,25 @@ fn bearer_token(token: &str) -> String {
   format!("Bearer {token}", token = token)
 }
 
-pub fn route(path: &str) -> String {
+fn route(path: &str) -> String {
   format!("{base}{path}", base = BASE_URL, path = path)
+}
+
+pub async fn current_user(credentials: &HarvestCredentials) -> Result<User, reqwest::Error> {
+  let url = route("/users/me");
+  let builder = reqwest::Client::new().get(&url);
+  let builder = attach_credentials(builder, &credentials);
+  builder.send().await?.json().await
+}
+
+pub async fn time_entries(
+  query: &query::TimeEntriesQuery,
+  credentials: &HarvestCredentials,
+) -> Result<TimeEntries, reqwest::Error> {
+  let url = route("/time_entries");
+  let builder = reqwest::Client::new().get(&url).query(query);
+  let builder = attach_credentials(builder, &credentials);
+  builder.send().await?.json().await
 }
 
 #[derive(Deserialize, Debug)]
