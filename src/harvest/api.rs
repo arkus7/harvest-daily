@@ -1,5 +1,5 @@
 use super::credentials::HarvestCredentials;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Local};
 use reqwest::header;
 use serde::Deserialize;
 
@@ -48,9 +48,14 @@ pub struct TimeEntry {
   pub spent_date: String,
   pub hours: f64,
   pub rounded_hours: f64,
-  pub created_at: DateTime<Utc>,
+  pub created_at: DateTime<Local>,
   pub user: User,
   pub project: Project,
+  pub task: Task,
+  pub notes: String,
+  pub timer_started_at: Option<DateTime<Local>>,
+  pub started_time: Option<String>,
+  pub ended_time: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -69,10 +74,18 @@ pub struct Project {
   pub name: String,
 }
 
+#[derive(Deserialize, Debug)]
+pub struct Task {
+  pub id: u32,
+  pub name: String,
+}
+
 pub mod query {
-  use serde::{Deserialize, Serialize};
-  #[derive(Deserialize, Serialize, Debug)]
+  use chrono::{DateTime, Local};
+  use serde::Serialize;
+  #[derive(Serialize, Debug)]
   pub struct TimeEntriesQuery {
     pub user_id: u32,
+    pub from: Option<DateTime<Local>>,
   }
 }
