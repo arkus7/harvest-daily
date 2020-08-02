@@ -10,7 +10,13 @@ pub struct HarvestCredentials {
 
 impl HarvestCredentials {
   pub fn from_env() -> Result<HarvestCredentials, envy::Error> {
-    dotenv::dotenv().expect("Cannot load .env file");
+    match dotenv::dotenv() {
+      Ok(path) => println!(
+        "Loaded environmental variables from path: {}",
+        path.to_string_lossy()
+      ),
+      Err(_) => print!("Ignoring loading .env file, as it was not found..."),
+    }
     envy::from_env::<HarvestCredentials>()
   }
 }
