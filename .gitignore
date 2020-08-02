@@ -1,2 +1,4 @@
 /target
 .env
+settings.toml
+template.hbs
