@@ -1,4 +1,5 @@
 use super::credentials::HarvestCredentials;
+use chrono::{DateTime, Utc};
 use reqwest::header;
 use serde::Deserialize;
 
@@ -47,7 +48,7 @@ pub struct TimeEntry {
   pub spent_date: String,
   pub hours: f64,
   pub rounded_hours: f64,
-  pub created_at: String,
+  pub created_at: DateTime<Utc>,
   pub user: User,
   pub project: Project,
 }
