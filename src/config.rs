@@ -68,7 +68,7 @@ impl Config {
     let args_config = Config::from_args();
     if let Some(path) = &args_config.config_path {
       let file_config = Config::from_toml(path).expect("Failed to read config from file");
-      return Ok(Config::merge(vec![args_config, file_config]));
+      return Ok(Config::merge(vec![file_config, args_config]));
     }
     return Ok(args_config);
   }
