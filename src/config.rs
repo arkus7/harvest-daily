@@ -1,35 +1,8 @@
 use chrono::{Local, NaiveDate};
 use serde::{Deserialize, Serialize};
 
-use std::{
-  fmt,
-  path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
 use structopt::StructOpt;
-
-#[derive(Debug)]
-enum ConfigError {
-  TemplateNotFound { path: PathBuf },
-  InvalidDate { variable: String, value: String },
-}
-
-impl fmt::Display for ConfigError {
-  fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
-    match self {
-      ConfigError::TemplateNotFound { path } => write!(
-        fmt,
-        "Template not found, path was: {path}",
-        path = std::fs::canonicalize(path).unwrap().to_str().unwrap()
-      ),
-      ConfigError::InvalidDate { variable, value } => write!(
-        fmt,
-        "Could not parse date, config variable: {var}, value: {value}",
-        var = variable,
-        value = value
-      ),
-    }
-  }
-}
 
 #[derive(Debug, Serialize, Deserialize, StructOpt)]
 #[structopt(name = "harvest-daily")]
@@ -94,7 +67,7 @@ impl Config {
   pub fn new() -> Result<Config, confy::ConfyError> {
     let args_config = Config::from_args();
     if let Some(path) = &args_config.config_path {
-      let file_config = Config::from_toml(path).unwrap();
+      let file_config = Config::from_toml(path).expect("Failed to read config from file");
       return Ok(Config::merge(vec![args_config, file_config]));
     }
     return Ok(args_config);
