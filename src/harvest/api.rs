@@ -1,7 +1,7 @@
 use super::credentials::HarvestCredentials;
 use chrono::{DateTime, Local};
 use reqwest::header;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 const USER_AGENT: &str = "harvest-daily";
 const ACCOUNT_ID_HEADER: &str = "Harvest-Account-ID";
@@ -14,7 +14,7 @@ fn attach_credentials(
   builder
     .header(header::USER_AGENT, USER_AGENT)
     .header(header::AUTHORIZATION, bearer_token(&credentials.token))
-    .header(ACCOUNT_ID_HEADER, &credentials.account_id)
+    .header(ACCOUNT_ID_HEADER, format!("{}", &credentials.account_id))
 }
 
 fn bearer_token(token: &str) -> String {
@@ -42,7 +42,7 @@ pub async fn time_entries(
   builder.send().await?.json().await
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct TimeEntry {
   pub id: u32,
   pub spent_date: String,
@@ -58,34 +58,35 @@ pub struct TimeEntry {
   pub ended_time: Option<String>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct TimeEntries {
   pub time_entries: Vec<TimeEntry>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct User {
   pub id: u32,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Project {
   pub id: u32,
   pub name: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Task {
   pub id: u32,
   pub name: String,
 }
 
 pub mod query {
-  use chrono::{DateTime, Local};
+  use chrono::NaiveDate;
   use serde::Serialize;
   #[derive(Serialize, Debug)]
   pub struct TimeEntriesQuery {
     pub user_id: u32,
-    pub from: Option<DateTime<Local>>,
+    pub from: Option<NaiveDate>,
+    pub to: Option<NaiveDate>,
   }
 }
