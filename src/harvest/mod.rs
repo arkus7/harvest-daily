@@ -4,11 +4,8 @@ mod credentials;
 use super::config::Config;
 use api::query::TimeEntriesQuery;
 use api::TimeEntries;
+use chrono::NaiveDate;
 use credentials::HarvestCredentials;
-
-use chrono::offset::TimeZone;
-use chrono::Datelike;
-use chrono::{Local, NaiveDate};
 
 #[derive(Debug)]
 pub struct HarvestClient {
@@ -43,7 +40,6 @@ impl HarvestClient {
   }
 
   pub async fn time_entries(&self) -> Result<TimeEntries, reqwest::Error> {
-    let today = Local::now().date();
     let query = TimeEntriesQuery {
       user_id: self
         .user_id
