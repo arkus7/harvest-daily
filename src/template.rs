@@ -1,11 +1,26 @@
-use crate::harvest::api::TimeEntry;
+use crate::harvest::api::{Project, TimeEntry};
+use chrono::NaiveDate;
 use handlebars::Handlebars;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
 
-pub fn render_file_template(
+struct TemplateData {
+  dates: Vec<EntriesByDate>,
+}
+
+struct EntriesByDate {
+  date: NaiveDate,
+  projects: Vec<EntriesByProject>,
+}
+
+struct EntriesByProject {
+  project: Project,
   entries: Vec<TimeEntry>,
+}
+
+pub fn render_file_template(
+  entries: &Vec<TimeEntry>,
   template_path: &PathBuf,
 ) -> Result<String, handlebars::TemplateRenderError> {
   let template = read_template(&template_path).map_err(|e| {
@@ -21,7 +36,7 @@ pub fn render_file_template(
 }
 
 fn render(
-  entries: Vec<TimeEntry>,
+  entries: &Vec<TimeEntry>,
   template: &str,
 ) -> Result<String, handlebars::TemplateRenderError> {
   let handlebars = Handlebars::new();

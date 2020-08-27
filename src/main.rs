@@ -12,7 +12,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
   if cfg.harvest_user_id == None {
     harvest.prepare().await?;
   }
-  let entries = harvest.time_entries().await?.time_entries;
+  let time_entries = harvest.time_entries().await?;
+  println!("{:?}", time_entries.group_by_date());
+  let entries = &time_entries.time_entries;
   let result = template::render_file_template(entries, &cfg.template_path.unwrap()).unwrap();
   println!("{}", result);
 

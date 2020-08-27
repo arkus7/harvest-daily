@@ -1,7 +1,8 @@
 use super::credentials::HarvestCredentials;
-use chrono::{DateTime, Local};
+use chrono::{DateTime, Local, NaiveDate};
 use reqwest::header;
 use serde::{Deserialize, Serialize};
+use std::{collections::HashMap, iter::Map};
 
 const USER_AGENT: &str = "harvest-daily";
 const ACCOUNT_ID_HEADER: &str = "Harvest-Account-ID";
@@ -61,6 +62,25 @@ pub struct TimeEntry {
 #[derive(Deserialize, Serialize, Debug)]
 pub struct TimeEntries {
   pub time_entries: Vec<TimeEntry>,
+}
+
+impl TimeEntries {
+  pub fn group_by_date(&self) -> HashMap<NaiveDate, Vec<&TimeEntry>> {
+    let mut map: HashMap<NaiveDate, Vec<&TimeEntry>> = HashMap::new();
+    self.time_entries.iter().for_each(|e| {
+      let date = e.created_at.date().naive_local();
+      match map.get_mut(&date) {
+        Some(entries) => {
+          entries.push(e);
+        }
+        None => {
+          map.insert(date, vec![&e]);
+        }
+      };
+    });
+
+    map
+  }
 }
 
 #[derive(Deserialize, Serialize, Debug)]
